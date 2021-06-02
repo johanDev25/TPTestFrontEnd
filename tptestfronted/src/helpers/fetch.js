@@ -2,7 +2,6 @@ const baseUrl = process.env.REACT_APP_BACKEND_URL;
 
 const fetchSinToken = ( endpoint, data, method = 'GET' ) => {
 
-    console.log(data);
     const url = `${ baseUrl }/${ endpoint }`;
 
     if ( method === 'GET' ) {
@@ -20,7 +19,6 @@ const fetchSinToken = ( endpoint, data, method = 'GET' ) => {
 
 const fetchConToken = ( endpoint, data, method = 'GET' ) => {
 
-    console.log(data);
 
     const url = `${ baseUrl }/${ endpoint }`;
     const token = localStorage.getItem('token') || '';

@@ -9,12 +9,8 @@ import Grid from "@material-ui/core/Grid";
 import { makeStyles } from "@material-ui/core/styles";
 import { toast } from "react-toastify";
 import { validateEmail } from "../../utils/Validations";
-import { AppContext } from "../../components/context/AppContext";
-import {useContext} from "react"
 import { useForm } from '../../hooks/useForm';
 import { startLogin } from '../../actions/auth';
-import firebase from "../../utils/Firebase";
-import "firebase/auth";
 
 function Copyright() {
   return (
@@ -44,11 +40,6 @@ const LoginForm = ({ setSelectedForm }) => {
   const dispatch = useDispatch();
   const [formData, setFormData] = useState(defaultValueForm());
   const [formError, setFormError] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [userActive, setUserActive] = useState(true);
-  const [user, setUser] = useState(null);
- 
-  const { setlocalUser } = useContext(AppContext);
 
   const [ formLoginValues, handleLoginInputChange ] = useForm({
     email: '',
@@ -82,27 +73,7 @@ const { email, password } = formLoginValues;
     setFormError(errors);
 
     if (formOk) {
-      setIsLoading(true);
-        firebase
-        .auth()
-        .signInWithEmailAndPassword(formData.email, formData.password)
-        .then((response) => {
-          dispatch( startLogin( email, password ));
-          localStorage.setItem('user', response.user)
-          setUser(response.user);
-          setUserActive(response.user.emailVerified);
-          if (!response.user.emailVerified) {
-            toast.warning("You must verify your account");
-          }
-          setlocalUser(localStorage.getItem('user'))
-        })
-        .catch((err) => {
-          handlerErrors(err.code);
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
-  
+        dispatch( startLogin( email, password ));
     }
   };
 
@@ -156,7 +127,6 @@ const { email, password } = formLoginValues;
           </span>
         )}
         <Button
-          loading={isLoading}
           type="submit"
           fullWidth
           variant="contained"
@@ -176,13 +146,6 @@ const { email, password } = formLoginValues;
             </Link>
           </Grid>
         </Grid>
-        {!userActive && (
-          <ButtonResetSendEmailVerification
-            user={user}
-            setIsLoading={setIsLoading}
-            setUserActive={setUserActive}
-          />
-        )}
         <Box mt={5}>
           <Copyright />
         </Box>
@@ -191,51 +154,6 @@ const { email, password } = formLoginValues;
   );
 };
 
-function handlerErrors(code) {
-  switch (code) {
-    case "auth/wrong-password":
-      toast.warning("user or password are incorrect");
-      break;
-    case "auth/too-many-requests":
-      toast.warning("you has been sending a lot of request in a few seconds.");
-      break;
-    case "auth/user-not-found":
-      toast.warning("user or password are incorrect");
-      break;
-    default:
-      break;
-  }
-}
-
-function ButtonResetSendEmailVerification(props) {
-  const { user, setIsLoading, setUserActive } = props;
-
-  const resendVerificationEmail = () => {
-    user
-      .sendEmailVerification()
-      .then(() => {
-        toast.success("Se ha enviado el email de verificacion.");
-      })
-      .catch((err) => {
-        handlerErrors(err.code);
-      })
-      .finally(() => {
-        setIsLoading(false);
-        setUserActive(true);
-      });
-  };
-
-  return (
-    <div className="resend-verification-email">
-      <p>
-        If you dont have recived the verification email please click{" "}
-        <Link href="#" variant="body2" onClick={resendVerificationEmail}>
-          {"Here"}
-        </Link>
-      </p>
-    </div>
-  );
-}
 
 function defaultValueForm() {
   return {

@@ -22,7 +22,8 @@ const crearUsuario = async(req, res = response ) => {
         // Encriptar contraseña
         const salt = bcrypt.genSaltSync();
         usuario.password = bcrypt.hashSync( password, salt );
-
+        
+        usuario.isAdmin = false;
 
         await usuario.save();
 
@@ -33,6 +34,7 @@ const crearUsuario = async(req, res = response ) => {
             ok: true,
             uid: usuario.id,
             username: usuario.username,
+            isAdmin: usuario.isAdmin,
             token
         })
         
@@ -78,6 +80,7 @@ const loginUsuario = async(req, res = response ) => {
             ok: true,
             uid: usuario.id,
             username: usuario.username,
+            isAdmin: usuario.isAdmin,
             token
         })
 
@@ -102,6 +105,7 @@ const revalidarToken = async (req, res = response ) => {
 
     res.json({
         ok: true,
+        uid,
         token
     })
 }

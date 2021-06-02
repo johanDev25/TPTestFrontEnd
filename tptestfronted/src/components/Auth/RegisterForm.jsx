@@ -11,8 +11,7 @@ import { toast } from "react-toastify";
 import { validateEmail } from "../../utils/Validations";
 import { useForm } from '../../hooks/useForm';
 import { startRegister } from '../../actions/auth';
-import firebase from "../../utils/Firebase";
-import "firebase/auth";
+ 
 
 function Copyright() {
   return (
@@ -81,45 +80,15 @@ const { username, email, password } = formRegisterValues;
 
     if (formOk) {
       setIsLoading(true);
-      dispatch( startRegister( email, password, username ) );
-      firebase
-        .auth()
-        .createUserWithEmailAndPassword(formData.email, formData.password)
-        .then(async () => {
-          changeUserName();
-          sendVerificationEmail();
-        })
-        .catch(() => {
-          toast.error("Error al crear la cuenta.");
-        })
-        .finally(() => {
-          setIsLoading(false);
-          setSelectedForm(null);
-        });
+      try {
+        dispatch( startRegister( email, password, username ));
+      } catch (error) {
+        toast.error("Error creating user.");
+      } finally {
+        setIsLoading(false);
+        setSelectedForm(null);
+      }
     }
-  };
-
-  const changeUserName = () => {
-    firebase
-      .auth()
-      .currentUser.updateProfile({
-        displayName: formData.username,
-      })
-      .catch(() => {
-        toast.error("Error al asignar el  de usuario.");
-      });
-  };
-
-  const sendVerificationEmail = () => {
-    firebase
-      .auth()
-      .currentUser.sendEmailVerification()
-      .then(() => {
-        toast.success("Se ha enviado un email de verificacion.");
-      })
-      .catch(() => {
-        toast.error("Error al enviar el email de verificacion.");
-      });
   };
 
   return (

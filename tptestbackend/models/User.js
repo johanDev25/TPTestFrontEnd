@@ -16,6 +16,11 @@ const UserSchema = mongoose.Schema({
     required: true,
     trim: true
   },
+  isAdmin: {
+    type: Boolean,
+    required: true,
+    trim: true
+  },
   registro: {
     type: Date,
     default: Date.now()

@@ -1,21 +1,41 @@
 import React from "react";
-import { Switch, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Switch
+} from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { useEffect, useContext } from 'react';
+import { AppContext } from "../components/context/AppContext";
+import { startChecking } from '../actions/auth';
+import ProtectedRoute from './ProtectedRoute';
 
-import UserVIP from "../pages/UserVIP";
-import User from "../pages/User";
-import Favorites from "../pages/Favorites"
 
-const Routes = (props) => {
-  const { user, userAdmin } = props;
+const Routes = () => {
+  const dispatch = useDispatch();
+  const { setisUAdmin } = useContext(AppContext);
+  const { checking, uid, isAdmin } = useSelector( state => state.auth);
+
+  useEffect(() => {
+    localStorage.setItem("userAdmin", isAdmin)
+  }, [checking])
+
+  useEffect(() => {
+      dispatch( startChecking() );
+      setisUAdmin(localStorage.getItem('userAdmin'))
+  }, [dispatch])
+
+
+  if ( checking ) {
+      return (<h5>Waiting...</h5>);
+  }
+
   return (
+    <Router>
       <Switch>
-        <Route path="/" exact>
-          {userAdmin ? <UserVIP user={user} userAdmin={userAdmin} /> : <User user={user} userAdmin={userAdmin}/>}
-        </Route>
-        <Route path="/Favorites" exact>
-          <Favorites user={user}/>
-        </Route>
+        <ProtectedRoute path="/" exact isAuthenticated={ !!uid }/>
+        <ProtectedRoute path="/Favorites" exact isAuthenticated={ !!uid }/>
       </Switch>
+      </Router>
   );
 };
 

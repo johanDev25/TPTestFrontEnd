@@ -22,12 +22,13 @@ import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 import Fade from "@material-ui/core/Fade";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
-import Routes from "../routes/Routes";
-import { BrowserRouter as Router } from "react-router-dom";
-import { useDispatch } from 'react-redux'
-import { startLogout } from '../actions/auth';
-import firebase from "../utils/Firebase";
-import "firebase/auth";
+import { useDispatch } from "react-redux";
+import { startLogout } from "../actions/auth";
+import { useContext } from "react";
+import { AppContext } from "../components/context/AppContext";
+import User from "../pages/User";
+import UserVIP from "../pages/UserVIP";
+import Favorites from "../pages/Favorites";
 
 function Copyright() {
   return (
@@ -123,20 +124,22 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const LoggedLayout = ({ user, userAdmin }) => {
+const LoggedLayout = ({ path }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
+  const { isUAdmin } = useContext(AppContext);
   const [open, setOpen] = React.useState(true);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const openFade = Boolean(anchorEl);
+
+
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
   const handleClose = () => {
-    dispatch( startLogout() );
-    firebase.auth().signOut();
+    dispatch(startLogout());
     localStorage.setItem("user", null);
     setAnchorEl(null);
   };
@@ -149,100 +152,107 @@ const LoggedLayout = ({ user, userAdmin }) => {
   };
 
   return (
-    <Router>
-      <div className={classes.root}>
-        <CssBaseline />
-        <AppBar
-          position="absolute"
-          className={clsx(classes.appBar, open && classes.appBarShift)}
-        >
-          <Toolbar className={classes.toolbar}>
-            <IconButton
-              edge="start"
-              color="inherit"
-              aria-label="open drawer"
-              onClick={handleDrawerOpen}
-              className={clsx(
-                classes.menuButton,
-                open && classes.menuButtonHidden
-              )}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography
-              component="h1"
-              variant="h6"
-              color="inherit"
-              noWrap
-              className={classes.title}
-            >
-             {userAdmin ? "UserVIP" : "User"}
-            </Typography>
-            <IconButton color="inherit">
-              <Badge badgeContent={4} color="secondary">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
-            <IconButton
-              color="inherit"
-              aria-label="more"
-              aria-controls="fade-menu"
-              aria-haspopup="true"
-              onClick={handleClick}
-            >
-              <MoreVertIcon />
-            </IconButton>
+    <div className={classes.root}>
+      <CssBaseline />
+      <AppBar
+        position="absolute"
+        className={clsx(classes.appBar, open && classes.appBarShift)}
+      >
+        <Toolbar className={classes.toolbar}>
+          <IconButton
+            edge="start"
+            color="inherit"
+            aria-label="open drawer"
+            onClick={handleDrawerOpen}
+            className={clsx(
+              classes.menuButton,
+              open && classes.menuButtonHidden
+            )}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Typography
+            component="h1"
+            variant="h6"
+            color="inherit"
+            noWrap
+            className={classes.title}
+          >
+            {isUAdmin ? "UserVIP" : "User"}
+          </Typography>
+          <IconButton color="inherit">
+            <Badge badgeContent={4} color="secondary">
+              <NotificationsIcon />
+            </Badge>
+          </IconButton>
+          <IconButton
+            color="inherit"
+            aria-label="more"
+            aria-controls="fade-menu"
+            aria-haspopup="true"
+            onClick={handleClick}
+          >
+            <MoreVertIcon />
+          </IconButton>
 
-            <Menu
-              id="fade-menu"
-              anchorEl={anchorEl}
-              keepMounted
-              open={openFade}
-              onClose={handleClose}
-              TransitionComponent={Fade}
-            >
-              <MenuItem onClick={handleClose}>Logout</MenuItem>
-            </Menu>
-          </Toolbar>
-        </AppBar>
-        <Drawer
-          variant="permanent"
-          classes={{
-            paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
-          }}
-          open={open}
-        >
-          <div className={classes.toolbarIcon}>
-            <IconButton onClick={handleDrawerClose}>
-              <ChevronLeftIcon />
-            </IconButton>
-          </div>
-
-          {userAdmin ? (
-            <>
-              <Divider />
-              <List>{ mainListItems }</List>
-            </>
-          ) : (
-            <>
-              <Divider />
-              <List>{secondaryListItems}</List>
-            </>
-          )}
-        </Drawer>
-        <main className={classes.content}>
-          <div className={classes.appBarSpacer} />
-          <Container maxWidth="lg" className={classes.container}>
-            <Grid container spacing={3}>
-              <Routes user={user} userAdmin={userAdmin} />
-            </Grid>
-            <Box pt={4}>
-              <Copyright />
-            </Box>
-          </Container>
-        </main>
-      </div>
-    </Router>
+          <Menu
+            id="fade-menu"
+            anchorEl={anchorEl}
+            keepMounted
+            open={openFade}
+            onClose={handleClose}
+            TransitionComponent={Fade}
+          >
+            <MenuItem onClick={handleClose}>Logout</MenuItem>
+          </Menu>
+        </Toolbar>
+      </AppBar>
+      <Drawer
+        variant="permanent"
+        classes={{
+          paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
+        }}
+        open={open}
+      >
+        <div className={classes.toolbarIcon}>
+          <IconButton onClick={handleDrawerClose}>
+            <ChevronLeftIcon />
+          </IconButton>
+        </div>
+        {isUAdmin ? (
+          <>
+            {" "}
+            <Divider />
+            <List>{mainListItems}</List>{" "}
+          </>
+        ) : (
+          <>
+            {" "}
+            <Divider />
+            <List>{secondaryListItems}</List>
+          </>
+        )}
+      </Drawer>
+      <main className={classes.content}>
+        <div className={classes.appBarSpacer} />
+        <Container maxWidth="lg" className={classes.container}>
+          <Grid container spacing={3}>
+            {path === "/" ? (
+              isUAdmin ? (
+                <UserVIP />
+              ) : (
+                <User />
+              )
+            ) : path === "/Favorites" ? (
+              <Favorites />
+            ) : null}
+          </Grid>
+          <Box pt={4}>
+            <Copyright />
+          </Box>
+        </Container>
+      </main>
+    </div>
   );
 };
 

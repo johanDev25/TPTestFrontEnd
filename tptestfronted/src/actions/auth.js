@@ -3,8 +3,8 @@ import { types } from '../types/types';
 import { toast } from "react-toastify";
 
 
-
 export const startLogin = ( email, password ) => {
+
     return async( dispatch ) => {
 
         const resp = await fetchSinToken( 'users', { email, password }, 'POST' );
@@ -13,11 +13,12 @@ export const startLogin = ( email, password ) => {
         if( body.ok ) {
             localStorage.setItem('token', body.token );
             localStorage.setItem('token-init-date', new Date().getTime() );
-
             dispatch( login({
                 uid: body.uid,
-                username: body.username
+                username: body.username,
+                isAdmin: body.isAdmin,
             }) )
+            
         } else {
             toast.error(body.msg);
         }
@@ -38,7 +39,8 @@ export const startRegister = ( email, password, username ) => {
 
             dispatch( login({
                 uid: body.uid,
-                username: body.username
+                username: body.username,
+                isAdmin: body.isAdmin,
             }) )
         } else {
             toast.error(body.msg);
@@ -53,14 +55,15 @@ export const startChecking = () => {
 
         const resp = await fetchConToken( 'users/renew' );
         const body = await resp.json();
-
+    
         if( body.ok ) {
             localStorage.setItem('token', body.token );
             localStorage.setItem('token-init-date', new Date().getTime() );
 
             dispatch( login({
                 uid: body.uid,
-                username: body.username
+                username: body.username,
+                isAdmin: body.isAdmin,
             }) )
         } else {
             dispatch( checkingFinish() );
